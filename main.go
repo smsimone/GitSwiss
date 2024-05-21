@@ -6,7 +6,6 @@ import (
 	"os"
 
 	command "it.smaso/git_utilities/commands"
-	"it.smaso/git_utilities/configs"
 	"it.smaso/git_utilities/pool"
 )
 
@@ -17,10 +16,6 @@ func main() {
 	}
 
 	pool.NewPool(pool.WithMaxRunners(12))
-
-	configs.NewConfig(
-		configs.WithGitExec("/usr/bin/git"),
-	)
 
 	for _, cmd := range command.GetRegisteredCommands() {
 		if cmd.GetFriendlyName() == os.Args[1] {

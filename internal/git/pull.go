@@ -3,9 +3,9 @@ package git
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 
-	"it.smaso/git_utilities/configs"
 	"it.smaso/git_utilities/internal/utilities"
 )
 
@@ -14,8 +14,9 @@ func Pull(ctx context.Context, path string) error {
 		return fmt.Errorf("not executing in a git repository")
 	}
 
-	cmd := exec.Command(configs.Instance().GitExec, "pull")
+	cmd := exec.Command("git", "pull")
 	cmd.Dir = path
+	cmd.Env = os.Environ()
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to pull: %s", err.Error())

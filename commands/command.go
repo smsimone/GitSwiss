@@ -1,6 +1,11 @@
 package command
 
-import "context"
+import (
+	"context"
+	"flag"
+	"fmt"
+	"os"
+)
 
 type Command interface {
 	// GetFriendlyName returns the name to be used to call the program
@@ -13,10 +18,21 @@ type Command interface {
 	Execute(context.Context) error
 
 	// defineFlags defines the flags used by the single command
-	defineFlags()
+	DefineFlags()
 
 	// checkFlagsAndDefaults checks if the flags are correctly set and assign default values
-	checkFlagsAndDefaults() error
+	CheckFlagsAndDefaults() error
+}
+
+func StartupChecks(cmd Command) error {
+	cmd.DefineFlags()
+	flag.CommandLine.Parse(os.Args[2:])
+	if err := cmd.CheckFlagsAndDefaults(); err != nil {
+		fmt.Println("Failed to parse flags\n", err.Error())
+		flag.PrintDefaults()
+		return err
+	}
+	return nil
 }
 
 func GetRegisteredCommands() []Command {

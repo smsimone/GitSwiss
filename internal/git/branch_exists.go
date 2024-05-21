@@ -3,10 +3,9 @@ package git
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
-
-	"it.smaso/git_utilities/configs"
 )
 
 type BranchResult struct {
@@ -17,8 +16,9 @@ type BranchResult struct {
 // BranchExists checks if the required branch exists in the projectDirectory
 // If the branch exists, it returns the full branch name and true
 func BranchExists(ctx context.Context, projectDirectory, branchName string) *BranchResult {
-	cmd := exec.Command(configs.Instance().GitExec, "branch", "-a")
+	cmd := exec.Command("git", "branch", "-a")
 	cmd.Dir = projectDirectory
+	cmd.Env = os.Environ()
 
 	bytes, err := cmd.Output()
 	if err != nil {

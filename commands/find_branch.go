@@ -25,13 +25,13 @@ type FindBranchCommand struct {
 	helpMsg         *bool
 }
 
-func (cmd *FindBranchCommand) defineFlags() {
+func (cmd *FindBranchCommand) DefineFlags() {
 	cmd.requestedBranch = flag.String("branch", "", "The branch to check")
 	cmd.directory = flag.String("directory", "", "The directory to check the branch in")
 	cmd.helpMsg = flag.Bool("help", false, "Print the help message for the command")
 }
 
-func (cmd *FindBranchCommand) checkFlagsAndDefaults() error {
+func (cmd *FindBranchCommand) CheckFlagsAndDefaults() error {
 	if cmd.requestedBranch == nil || len(*cmd.requestedBranch) == 0 {
 		return fmt.Errorf("Branch name is required")
 	}
@@ -44,7 +44,7 @@ func (cmd *FindBranchCommand) checkFlagsAndDefaults() error {
 }
 
 func (cmd *FindBranchCommand) GetFriendlyName() string {
-	return "find_branch"
+	return "find-branch"
 }
 
 func (cmd *FindBranchCommand) GetDescription() string {
@@ -52,12 +52,8 @@ func (cmd *FindBranchCommand) GetDescription() string {
 }
 
 func (cmd *FindBranchCommand) Execute(ctx context.Context) error {
-	cmd.defineFlags()
-	flag.CommandLine.Parse(os.Args[2:])
-	if err := cmd.checkFlagsAndDefaults(); err != nil {
-		fmt.Println("Failed to parse flags\n", err.Error())
-		flag.PrintDefaults()
-		return nil
+	if err := StartupChecks(cmd); err != nil {
+		return err
 	}
 
 	if cmd.helpMsg != nil && *cmd.helpMsg {

@@ -3,16 +3,17 @@ package git
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
-
-	"it.smaso/git_utilities/configs"
 )
 
 // UncommittedFiles returns the list of uncommitted files in the repository
 func UncommittedFiles(ctx context.Context, path string) ([]string, error) {
-	cmd := exec.Command(configs.Instance().GitExec, "status", "-s")
+	cmd := exec.Command("git", "status", "-s")
 	cmd.Dir = path
+	cmd.Env = os.Environ()
+
 	bytes, err := cmd.Output()
 	if err != nil {
 		return []string{}, fmt.Errorf("failed to run git status: %s", err.Error())

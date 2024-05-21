@@ -3,9 +3,9 @@ package git
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 
-	"it.smaso/git_utilities/configs"
 	"it.smaso/git_utilities/internal/utilities"
 )
 
@@ -21,8 +21,9 @@ func Checkout(ctx context.Context, path, branch string) error {
 		return fmt.Errorf("uncommitted files in the repository")
 	}
 
-	cmd := exec.Command(configs.Instance().GitExec, "checkout", branch)
+	cmd := exec.Command("git", "checkout", branch)
 	cmd.Dir = path
+	cmd.Env = os.Environ()
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to checkout branch: %s", err.Error())

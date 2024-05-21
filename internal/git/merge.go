@@ -3,9 +3,9 @@ package git
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 
-	"it.smaso/git_utilities/configs"
 	"it.smaso/git_utilities/internal/utilities"
 )
 
@@ -15,8 +15,9 @@ func Merge(ctx context.Context, path, source string) error {
 		return fmt.Errorf("not executing in a git repository")
 	}
 
-	cmd := exec.Command(configs.Instance().GitExec, "merge", source)
+	cmd := exec.Command("git", "merge", source)
 	cmd.Dir = path
+	cmd.Env = os.Environ()
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to merge branch: %s", err.Error())

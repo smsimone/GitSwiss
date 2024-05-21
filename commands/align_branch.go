@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"os"
 
 	"it.smaso/git_utilities/internal/git"
 	"it.smaso/git_utilities/internal/utilities"
@@ -26,14 +25,14 @@ func (c *AlignBranchCommand) GetDescription() string {
 	return "Aligns the target branch with the source branch"
 }
 
-func (c *AlignBranchCommand) defineFlags() {
+func (c *AlignBranchCommand) DefineFlags() {
 	c.source = flag.String("source", "", "The branch to align from")
 	c.target = flag.String("target", "", "The branch to align to (defaults to the current branch)")
 	c.directory = flag.String("directory", ".", "The project directory to align (defaults to the current directory)")
 	c.helpMsg = flag.Bool("help", false, "Print the help message for the command")
 }
 
-func (c *AlignBranchCommand) checkFlagsAndDefaults() error {
+func (c *AlignBranchCommand) CheckFlagsAndDefaults() error {
 	if c.source == nil || len(*c.source) == 0 {
 		return fmt.Errorf("missing required source branch")
 	}
@@ -42,12 +41,8 @@ func (c *AlignBranchCommand) checkFlagsAndDefaults() error {
 }
 
 func (c *AlignBranchCommand) Execute(ctx context.Context) error {
-	c.defineFlags()
-	flag.CommandLine.Parse(os.Args[2:])
-	if err := c.checkFlagsAndDefaults(); err != nil {
-		fmt.Println("Failed to parse flags\n", err.Error())
-		flag.PrintDefaults()
-		return nil
+	if err := StartupChecks(c); err != nil {
+		return err
 	}
 
 	if c.helpMsg != nil && *c.helpMsg {
@@ -60,7 +55,6 @@ func (c *AlignBranchCommand) Execute(ctx context.Context) error {
 		return fmt.Errorf("failed to find directories: %s", err.Error())
 	}
 
-	return nil
 	for _, dir := range *dirs {
 		path := fmt.Sprintf("%s/%s", *c.directory, dir.Name())
 		if !utilities.ContainsFile(path, ".git") {
