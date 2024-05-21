@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"it.smaso/git_utilities/internal/git"
-	"it.smaso/git_utilities/internal/utilities"
-	"it.smaso/git_utilities/pool"
+	"it.smaso/git_swiss/internal/git"
+	"it.smaso/git_swiss/internal/utilities"
+	"it.smaso/git_swiss/pool"
 )
 
 type branchRes struct {

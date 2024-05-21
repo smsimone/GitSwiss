@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	command "it.smaso/git_utilities/commands"
-	"it.smaso/git_utilities/pool"
+	command "it.smaso/git_swiss/commands"
+	"it.smaso/git_swiss/pool"
 )
 
 func main() {

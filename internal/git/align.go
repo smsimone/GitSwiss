@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"it.smaso/git_utilities/pool"
+	"it.smaso/git_swiss/pool"
 )
 
 // Align aligns the target branch with the source branch

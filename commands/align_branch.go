@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 
-	"it.smaso/git_utilities/internal/git"
-	"it.smaso/git_utilities/internal/utilities"
+	"it.smaso/git_swiss/internal/git"
+	"it.smaso/git_swiss/internal/utilities"
 )
 
 type AlignBranchCommand struct {

@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 
-	"it.smaso/git_utilities/internal/utilities"
+	"it.smaso/git_swiss/internal/utilities"
 )
 
 // Checkout checks out the given branch

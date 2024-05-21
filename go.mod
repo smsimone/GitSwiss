@@ -1,3 +1,3 @@
-module it.smaso/git_utilities
+module it.smaso/git_swiss
 
 go 1.22.3
