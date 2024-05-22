@@ -38,7 +38,7 @@ func (c *AlignBranchCommand) CheckFlagsAndDefaults() error {
 	if c.source == nil || len(*c.source) == 0 {
 		return fmt.Errorf("missing required source branch")
 	}
-	if *c.strategy != git.MERGE_STRATEGY && *c.strategy != git.PULL_STRATEGY {
+	if c.strategy != nil && *c.strategy != git.MERGE_STRATEGY && *c.strategy != git.PULL_STRATEGY {
 		return fmt.Errorf("strategy '%s' is not valid. Valid values are: 'merge' (default) | 'pull'", *c.strategy)
 	}
 	if c.directory == nil {
