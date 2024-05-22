@@ -7,16 +7,16 @@ A collection of git commands to help managing mutliple git repositories at once.
 
 ## Available commands
 
-- **align-branch**
-- **find-branch**
-- **create-branch**
+- [**align-branch**](#align-branch)
+- [**find-branch**](#find-branch)
+- [**create-branch**](#create-branch)
 
 ### To be added
 
-- [ ] **update-branches**
+- [ ] [**update-branches**](#create-branch)
 - [ ] ...
 
-# Align Branch
+## Align Branch
 
 For each repository in the given directory, it will align the target branch to the given source branch.
 
@@ -24,7 +24,7 @@ For each repository in the given directory, it will align the target branch to t
 swit align-branch -source <source-branch> -target <target-branch> -directory <directory>
 ```
 
-# Find Branch
+## Find Branch
 
 Iterates all the given repositories in search of a given branch.
 
@@ -32,7 +32,7 @@ Iterates all the given repositories in search of a given branch.
 swit find-branch -branch <branch> [-directory <directory>]
 ```
 
-# Create branch
+## Create branch
 
 Createe a branch in the current repository and push it to the remote.
 
@@ -40,7 +40,7 @@ Createe a branch in the current repository and push it to the remote.
 swit create-branch -target <branch> [-source <source-branch>] [-directory <directory>]
 ```
 
-# Update branches
+## Update branches
 
 Update the branch in the given directory. If no branch is given, it will update the current branch, otherwise will update all the matching branches (it will search with a like)
 
