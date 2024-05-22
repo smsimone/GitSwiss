@@ -16,6 +16,8 @@ type AlignBranchCommand struct {
 	source    *string
 	target    *string
 	directory *string
+	strategy  *string
+	remote    *string
 }
 
 func (c *AlignBranchCommand) GetFriendlyName() string {
@@ -36,9 +38,20 @@ func (c *AlignBranchCommand) CheckFlagsAndDefaults() error {
 	if c.source == nil || len(*c.source) == 0 {
 		return fmt.Errorf("missing required source branch")
 	}
+	if *c.strategy != git.MERGE_STRATEGY && *c.strategy != git.PULL_STRATEGY {
+		return fmt.Errorf("strategy '%s' is not valid. Valid values are: 'merge' (default) | 'pull'", *c.strategy)
+	}
 	if c.directory == nil {
 		dir := "."
 		c.directory = &dir
+	}
+	if c.remote == nil {
+		defaultRemote := "origin"
+		c.remote = &defaultRemote
+	}
+	if c.strategy == nil {
+		strategy := git.MERGE_STRATEGY
+		c.strategy = &strategy
 	}
 
 	return nil
@@ -56,7 +69,7 @@ func (c *AlignBranchCommand) Execute(ctx context.Context) error {
 
 	pool.Execute(
 		func(path string) error {
-			if err := git.Align(context.Background(), path, *c.source, *c.target); err != nil {
+			if err := git.Align(context.Background(), path, *c.source, *c.target, *c.strategy, *c.remote); err != nil {
 				log.Printf("Failed to align branch in %s: %s\n", path, err.Error())
 				return err
 			}

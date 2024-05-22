@@ -7,8 +7,13 @@ import (
 	"it.smaso/git_swiss/pool"
 )
 
+const (
+	MERGE_STRATEGY string = "merge"
+	PULL_STRATEGY  string = "pull"
+)
+
 // Align aligns the target branch with the source branch
-func Align(ctx context.Context, path, source, target string) error {
+func Align(ctx context.Context, path, source, target string, strategy string, remote string) error {
 	results := pool.RunInParallel[string, *BranchResult](
 		func() pool.KeyedResult[string, *BranchResult] {
 			return pool.KeyedResult[string, *BranchResult]{
@@ -41,15 +46,21 @@ func Align(ctx context.Context, path, source, target string) error {
 		}
 	}
 
-	if err := Pull(ctx, path); err != nil {
-		return fmt.Errorf("failed to pull source: %s", err.Error())
-	}
+	if strategy == MERGE_STRATEGY {
+		if err := Pull(ctx, path); err != nil {
+			return fmt.Errorf("failed to pull source: %s", err.Error())
+		}
 
-	if err := Checkout(ctx, path, target); err != nil {
-		return fmt.Errorf("failed to checkout to target: %s", err.Error())
-	}
-	if err := Merge(ctx, path, source); err != nil {
-		return fmt.Errorf("failed to merge source into target: %s", err.Error())
+		if err := Checkout(ctx, path, target); err != nil {
+			return fmt.Errorf("failed to checkout to target: %s", err.Error())
+		}
+		if err := Merge(ctx, path, source); err != nil {
+			return fmt.Errorf("failed to merge source into target: %s", err.Error())
+		}
+	} else {
+		if err := MergePull(ctx, path, remote, source); err != nil {
+			return fmt.Errorf("failed to merge with pull strategy: %s", err.Error())
+		}
 	}
 
 	return nil
