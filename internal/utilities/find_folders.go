@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // FindFolders finds all the folders in the given directory
@@ -32,19 +33,24 @@ func FindFolders(ctx context.Context, currDir string) (*[]fs.DirEntry, error) {
 	return &folders, nil
 }
 
-// FindRepositories wrapper of FindFolders that filters out non-repositories
-func FindRepositories(ctx context.Context, currDir string) (*[]fs.DirEntry, error) {
+// FindRepositories wrapper of FindFolders that filters out non-repositories and will return the absolute path for each repository
+func FindRepositories(ctx context.Context, currDir string) (*[]string, error) {
 	entries, err := FindFolders(ctx, currDir)
 	if err != nil {
 		return nil, err
 	}
 
-	repositories := []fs.DirEntry{}
+	repositories := []string{}
 	for _, item := range *entries {
-		if ContainsFile(filepath.Join(currDir, item.Name()), ".git") {
-			repositories = append(repositories, item)
+		path := filepath.Join(currDir, item.Name())
+		if strings.HasSuffix(currDir, item.Name()) {
+			path = currDir
+		}
+		if ContainsFile(path, ".git") {
+			repositories = append(repositories, path)
 		}
 	}
+
 	return &repositories, nil
 }
 

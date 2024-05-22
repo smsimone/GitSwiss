@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"os"
+	"log"
 
 	"it.smaso/git_swiss/internal/git"
 	"it.smaso/git_swiss/internal/utilities"
@@ -54,25 +54,15 @@ func (c *AlignBranchCommand) Execute(ctx context.Context) error {
 		return fmt.Errorf("failed to find directories: %s", err.Error())
 	}
 
-	paths := []string{}
-	for _, dir := range *repositories {
-		if dir.Name() == *c.directory {
-			paths = append(paths, *c.directory)
-			continue
-		}
-		path := fmt.Sprintf("%s%s%s", *c.directory, string(os.PathSeparator), dir.Name())
-		paths = append(paths, path)
-	}
-
 	pool.Execute(
 		func(path string) error {
 			if err := git.Align(context.Background(), path, *c.source, *c.target); err != nil {
-				fmt.Printf("Failed to align branch in %s: %s\n", path, err.Error())
+				log.Printf("Failed to align branch in %s: %s\n", path, err.Error())
 				return err
 			}
 			return nil
 		},
-		paths,
+		*repositories,
 	)
 
 	return nil

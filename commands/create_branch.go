@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"os"
 
 	"it.smaso/git_swiss/internal/git"
 	"it.smaso/git_swiss/internal/utilities"
@@ -59,20 +58,11 @@ func (c *CreateBranchCommand) Execute(ctx context.Context) error {
 		return fmt.Errorf("failed to find directories: %s", err.Error())
 	}
 
-	paths := []string{}
-	for _, repo := range *repositories {
-		if repo.Name() == *c.directory {
-			paths = append(paths, *c.directory)
-			continue
-		}
-		paths = append(paths, fmt.Sprintf("%s%s%s", *c.directory, string(os.PathSeparator), repo.Name()))
-	}
-
 	pool.Execute(
 		func(path string) error {
 			return createBranch(path, c.source, *c.target)
 		},
-		paths,
+		*repositories,
 	)
 
 	return nil

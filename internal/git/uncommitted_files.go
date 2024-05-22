@@ -19,7 +19,14 @@ func UncommittedFiles(ctx context.Context, path string) ([]string, error) {
 		return []string{}, fmt.Errorf("failed to run git status: %s", err.Error())
 	}
 	content := strings.Split(string(bytes), "\n")
-	return content, nil
+
+	files := []string{}
+	for _, x := range content {
+		if len(strings.TrimSpace(x)) > 0 {
+			files = append(files, x)
+		}
+	}
+	return files, nil
 }
 
 // PendingChanges returns true if there are uncommitted files in the repository

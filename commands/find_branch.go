@@ -59,16 +59,6 @@ func (cmd *FindBranchCommand) Execute(ctx context.Context) error {
 		return err
 	}
 
-	paths := []string{}
-	for _, x := range *repositories {
-		if x.Name() == *cmd.directory {
-			paths = append(paths, *cmd.directory)
-			continue
-		}
-		path := fmt.Sprintf("%s%s%s", *cmd.directory, string(os.PathSeparator), x.Name())
-		paths = append(paths, path)
-	}
-
 	names := pool.Execute(
 		func(path string) *branchRes {
 			res := git.BranchExists(
@@ -83,7 +73,7 @@ func (cmd *FindBranchCommand) Execute(ctx context.Context) error {
 			name := comps[len(comps)-1]
 			return &branchRes{project: name, branch: *res}
 		},
-		paths,
+		*repositories,
 	)
 
 	for _, x := range names {

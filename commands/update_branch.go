@@ -3,9 +3,7 @@ package command
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
-	"os"
 
 	"it.smaso/git_swiss/internal/git"
 	"it.smaso/git_swiss/internal/utilities"
@@ -51,36 +49,34 @@ func (c *UpdateBranchCommand) Execute(ctx context.Context) error {
 		return err
 	}
 
-	log.Printf("Got %d repositories", len(*repositories))
-
-	paths := []string{}
-	for _, repo := range *repositories {
-		if repo.Name() == *c.directory {
-			paths = append(paths, *c.directory)
-			continue
-		}
-		log.Printf("Generating path for %s: %s", repo.Name(), *c.directory)
-		path := fmt.Sprintf("%s%s%s", *c.directory, string(os.PathSeparator), repo.Name())
-		paths = append(paths, path)
-	}
-	log.Printf("Generated %d paths: %+v", len(paths), paths)
-
 	errors := pool.Execute(
 		func(path string) error {
-			branch, err := git.CurrentBranch(context.Background(), path)
+
+			files, err := git.UncommittedFiles(context.Background(), path)
 			if err != nil {
-				fmt.Printf("failed to get current branch of %s: %s\n", path, err.Error())
+				log.Printf("failed to get pending changes for %s: %s\n", path, err.Error())
 				return err
 			}
+			if len(files) > 0 {
+				log.Printf("skipping %s, %d pending changes\n", path, len(files))
+				return nil
+			}
+
+			branch, err := git.CurrentBranch(context.Background(), path)
+			if err != nil {
+				log.Printf("failed to get current branch of %s: %s\n", path, err.Error())
+				return err
+			}
+
 			if *branch != *c.branch && *c.checkout {
 				if err := git.Checkout(context.Background(), path, *c.branch); err != nil {
-					fmt.Printf("failed checkout for %s: %s\n", path, err.Error())
+					log.Printf("failed checkout for %s: %s\n", path, err.Error())
 					return err
 				}
 			}
 
 			if err := git.Pull(context.Background(), path); err != nil {
-				fmt.Printf("failed to pull data %s: %s\n", path, err.Error())
+				log.Printf("failed to pull data %s: %s\n", path, err.Error())
 				return err
 			}
 
@@ -88,7 +84,7 @@ func (c *UpdateBranchCommand) Execute(ctx context.Context) error {
 
 			return nil
 		},
-		paths,
+		*repositories,
 	)
 
 	for _, err := range errors {
