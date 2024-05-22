@@ -3,24 +3,31 @@ package git
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
 
 	"it.smaso/git_swiss/internal/utilities"
 )
 
-func Pull(ctx context.Context, path string) error {
+// If the provided path is not a git repository
+// an error will be returned.
+func CheckGitRepo(path string) error {
 	if !utilities.ContainsFile(path, ".git") {
 		return fmt.Errorf("not executing in a git repository")
 	}
-
-	cmd := exec.Command("git", "pull")
-	cmd.Dir = path
-	cmd.Env = os.Environ()
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to pull: %s", err.Error())
-	}
-
 	return nil
+}
+
+func Pull(ctx context.Context, path string) error {
+	err := CheckGitRepo(path)
+	if err == nil {
+		return Execute(path, "pull")
+	}
+	return err
+}
+
+func MergePull(ctx context.Context, path string, remote string, source string) error {
+	err := CheckGitRepo(path)
+	if err == nil {
+		return Execute(path, "pull", remote, source)
+	}
+	return err
 }
