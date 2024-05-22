@@ -32,7 +32,7 @@ func main() {
 
 func printAvailableCommands() {
 	fmt.Println("Missing command")
-	fmt.Println("Usage: go_utilities <program_name>")
+	fmt.Println("Usage: git-swiss <program_name>")
 	fmt.Println("")
 	fmt.Println("Available programs are:")
 	for _, cmd := range command.GetRegisteredCommands() {
