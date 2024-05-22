@@ -17,8 +17,10 @@ A collection of git commands to help managing mutliple git repositories at once.
 For each repository in the given directory, it will align the target branch to the given source branch.
 
 ```bash
-swit align-branch -source <source-branch> -target <target-branch> -directory <directory>
+swit align-branch -source <source-branch> -target <target-branch> [-directory <directory>] [-strategy <pull|merge>] [-remote <remote_name>]
 ```
+*Default strategy: merge*
+*Default remote:   origin*
 
 ## Find Branch
 
