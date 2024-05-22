@@ -9,10 +9,10 @@ A collection of git commands to help managing mutliple git repositories at once.
 
 - **align-branch**
 - **find-branch**
+- **create-branch**
 
 ### To be added
 
-- [ ] **create-branch**
 - [ ] **update-branches**
 - [ ] ...
 
@@ -37,7 +37,7 @@ git-swiss find-branch -branch <branch> [-directory <directory>]
 Createe a branch in the current repository and push it to the remote.
 
 ```bash
-git-swiss create-branch -branch <branch> [-source <source-branch>] [-directory <directory>]
+git-swiss create-branch -target <branch> [-source <source-branch>] [-directory <directory>]
 ```
 
 # Update branches

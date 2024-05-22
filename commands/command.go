@@ -24,6 +24,7 @@ type Command interface {
 	CheckFlagsAndDefaults() error
 }
 
+// StartupChecks runs pre-exec checks which are common between all commands
 func StartupChecks(cmd Command) error {
 	cmd.DefineFlags()
 	flag.CommandLine.Parse(os.Args[2:])
