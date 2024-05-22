@@ -10,11 +10,7 @@ A collection of git commands to help managing mutliple git repositories at once.
 - [**align-branch**](#align-branch)
 - [**find-branch**](#find-branch)
 - [**create-branch**](#create-branch)
-
-### To be added
-
-- [ ] [**update-branches**](#create-branch)
-- [ ] ...
+- [**update-branches**](#create-branch)
 
 ## Align Branch
 

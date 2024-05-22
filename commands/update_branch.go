@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 
 	"it.smaso/git_swiss/internal/git"
@@ -51,7 +52,6 @@ func (c *UpdateBranchCommand) Execute(ctx context.Context) error {
 
 	errors := pool.Execute(
 		func(path string) error {
-
 			files, err := git.UncommittedFiles(context.Background(), path)
 			if err != nil {
 				log.Printf("failed to get pending changes for %s: %s\n", path, err.Error())
@@ -59,7 +59,7 @@ func (c *UpdateBranchCommand) Execute(ctx context.Context) error {
 			}
 			if len(files) > 0 {
 				log.Printf("skipping %s, %d pending changes\n", path, len(files))
-				return nil
+				return fmt.Errorf("there were some pending changes")
 			}
 
 			branch, err := git.CurrentBranch(context.Background(), path)
@@ -68,10 +68,16 @@ func (c *UpdateBranchCommand) Execute(ctx context.Context) error {
 				return err
 			}
 
-			if *branch != *c.branch && *c.checkout {
-				if err := git.Checkout(context.Background(), path, *c.branch); err != nil {
-					log.Printf("failed checkout for %s: %s\n", path, err.Error())
-					return err
+			if *branch != *c.branch {
+				if *c.checkout {
+					if err := git.Checkout(context.Background(), path, *c.branch); err != nil {
+						log.Printf("failed checkout for %s: %s\n", path, err.Error())
+						return err
+					}
+				} else {
+					log.Printf("skipping %s, current branch is %s, expected %s\n", path, *branch, *c.branch)
+					log.Printf("to force checkout, use '-checkout' flag")
+					return fmt.Errorf("branch mismatch")
 				}
 			}
 
