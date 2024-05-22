@@ -4,8 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 
 	"it.smaso/git_swiss/internal/git"
+	"it.smaso/git_swiss/internal/utilities"
+	"it.smaso/git_swiss/pool"
 )
 
 type CreateBranchCommand struct {
@@ -37,6 +40,11 @@ func (c *CreateBranchCommand) CheckFlagsAndDefaults() error {
 		return fmt.Errorf("target branch is required")
 	}
 
+	if c.directory == nil {
+		dir := "."
+		c.directory = &dir
+	}
+
 	return nil
 }
 
@@ -46,39 +54,57 @@ func (c *CreateBranchCommand) Execute(ctx context.Context) error {
 		return err
 	}
 
-	var dir string
-	if c.directory != nil {
-		dir = *c.directory
-	} else {
-		dir = "."
+	repositories, err := utilities.FindRepositories(context.Background(), *c.directory)
+	if err != nil {
+		return fmt.Errorf("failed to find directories: %s", err.Error())
 	}
 
-	var source string
-	if c.source != nil {
-		res := git.BranchExists(context.Background(), dir, *c.source)
+	paths := []string{}
+	for _, repo := range *repositories {
+		if repo.Name() == *c.directory {
+			paths = append(paths, *c.directory)
+			continue
+		}
+		paths = append(paths, fmt.Sprintf("%s%s%s", *c.directory, string(os.PathSeparator), repo.Name()))
+	}
+
+	pool.Execute(
+		func(path string) error {
+			return createBranch(path, c.source, *c.target)
+		},
+		paths,
+	)
+
+	return nil
+}
+
+func createBranch(path string, source *string, target string) error {
+	var foundSource string
+	if source != nil {
+		res := git.BranchExists(context.Background(), path, *source)
 		if res == nil {
 			return fmt.Errorf("source branch does not exists")
 		}
-		source = res.Name
+		foundSource = res.Name
 	} else {
-		current, err := git.CurrentBranch(context.Background(), dir)
+		current, err := git.CurrentBranch(context.Background(), path)
 		if err != nil {
 			return err
 		}
-		source = *current
+		foundSource = *current
 	}
 
-	if err := git.Checkout(context.Background(), dir, source); err != nil {
+	if err := git.Checkout(context.Background(), path, foundSource); err != nil {
 		return fmt.Errorf("failed to checkout branch: %s", err.Error())
 	}
 
-	if err := git.Pull(context.Background(), dir); err != nil {
+	if err := git.Pull(context.Background(), path); err != nil {
 		return fmt.Errorf("failed to pull project: %s", err.Error())
 	}
 
-	if err := git.CheckoutCreate(context.Background(), dir, *c.target); err != nil {
+	if err := git.CheckoutCreate(context.Background(), path, target); err != nil {
 		return fmt.Errorf("failed to create new branch: %s", err.Error())
 	}
-
 	return nil
+
 }

@@ -5,11 +5,14 @@ import (
 	"os"
 )
 
-
 func ContainsFile(path, name string) bool {
+	if len(name) == 0 {
+		panic("name cannot be empty")
+	}
+
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		fmt.Printf("failed to read directory %s: %s\n", path, err.Error())
+		fmt.Printf("failed to read directory '%s': %s\n", path, err.Error())
 		return false
 	}
 

@@ -12,7 +12,7 @@ import (
 func FindFolders(ctx context.Context, currDir string) (*[]fs.DirEntry, error) {
 	entries, err := os.ReadDir(currDir)
 	if err != nil {
-		fmt.Printf("Failed to read directory: %s\n", err.Error())
+		fmt.Printf("Failed to read directory '%s': %s\n", currDir, err.Error())
 		return nil, err
 	}
 
@@ -30,6 +30,22 @@ func FindFolders(ctx context.Context, currDir string) (*[]fs.DirEntry, error) {
 	}
 
 	return &folders, nil
+}
+
+// FindRepositories wrapper of FindFolders that filters out non-repositories
+func FindRepositories(ctx context.Context, currDir string) (*[]fs.DirEntry, error) {
+	entries, err := FindFolders(ctx, currDir)
+	if err != nil {
+		return nil, err
+	}
+
+	repositories := []fs.DirEntry{}
+	for _, item := range *entries {
+		if ContainsFile(filepath.Join(currDir, item.Name()), ".git") {
+			repositories = append(repositories, item)
+		}
+	}
+	return &repositories, nil
 }
 
 type dirEntry struct {

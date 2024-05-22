@@ -40,5 +40,7 @@ func GetRegisteredCommands() []Command {
 	return []Command{
 		&FindBranchCommand{},
 		&AlignBranchCommand{},
+		&CreateBranchCommand{},
+		&UpdateBranchCommand{},
 	}
 }

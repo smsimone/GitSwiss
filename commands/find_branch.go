@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/fs"
 	"os"
 	"strings"
 
@@ -22,13 +21,11 @@ type FindBranchCommand struct {
 	Command
 	requestedBranch *string
 	directory       *string
-	helpMsg         *bool
 }
 
 func (cmd *FindBranchCommand) DefineFlags() {
 	cmd.requestedBranch = flag.String("branch", "", "The branch to check")
 	cmd.directory = flag.String("directory", "", "The directory to check the branch in")
-	cmd.helpMsg = flag.Bool("help", false, "Print the help message for the command")
 }
 
 func (cmd *FindBranchCommand) CheckFlagsAndDefaults() error {
@@ -56,29 +53,24 @@ func (cmd *FindBranchCommand) Execute(ctx context.Context) error {
 		return err
 	}
 
-	if cmd.helpMsg != nil && *cmd.helpMsg {
-		flag.PrintDefaults()
-		return nil
-	}
-
-	folders, err := utilities.FindFolders(context.Background(), *cmd.directory)
+	repositories, err := utilities.FindRepositories(context.Background(), *cmd.directory)
 	if err != nil {
-		fmt.Printf("Failed to read folder '%s': %s\n", *cmd.directory, err.Error())
+		fmt.Printf("Failed to find repositories '%s': %s\n", *cmd.directory, err.Error())
 		return err
 	}
 
-	compos := strings.Split(*cmd.directory, string(os.PathSeparator))
-	dirname := compos[len(compos)-1]
+	paths := []string{}
+	for _, x := range *repositories {
+		if x.Name() == *cmd.directory {
+			paths = append(paths, *cmd.directory)
+			continue
+		}
+		path := fmt.Sprintf("%s%s%s", *cmd.directory, string(os.PathSeparator), x.Name())
+		paths = append(paths, path)
+	}
 
 	names := pool.Execute(
-		func(a fs.DirEntry) *branchRes {
-			path := fmt.Sprintf("%s/%s", *cmd.directory, a.Name())
-			if strings.HasSuffix(path, dirname) {
-				path = *cmd.directory
-			}
-			if !utilities.ContainsFile(path, ".git") {
-				return nil
-			}
+		func(path string) *branchRes {
 			res := git.BranchExists(
 				context.Background(),
 				path,
@@ -87,9 +79,11 @@ func (cmd *FindBranchCommand) Execute(ctx context.Context) error {
 			if res == nil {
 				return nil
 			}
-			return &branchRes{project: a.Name(), branch: *res}
+			comps := strings.Split(path, string(os.PathSeparator))
+			name := comps[len(comps)-1]
+			return &branchRes{project: name, branch: *res}
 		},
-		*folders,
+		paths,
 	)
 
 	for _, x := range names {
