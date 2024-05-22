@@ -34,7 +34,10 @@ func (c *AlignBranchCommand) DefineFlags() {
 
 func (c *AlignBranchCommand) CheckFlagsAndDefaults() error {
 	if c.source == nil || len(*c.source) == 0 {
-		return fmt.Errorf("missing required source branch")
+		return fmt.Errorf("missing required target branch")
+	}
+	if c.target == nil || len(*c.target) == 0 {
+		c.target = c.source
 	}
 	if c.directory == nil {
 		dir := "."
