@@ -21,11 +21,13 @@ type FindBranchCommand struct {
 	Command
 	requestedBranch *string
 	directory       *string
+	checkout        *bool
 }
 
 func (cmd *FindBranchCommand) DefineFlags() {
 	cmd.requestedBranch = flag.String("branch", "", "The branch to check")
 	cmd.directory = flag.String("directory", "", "The directory to check the branch in")
+	cmd.checkout = flag.Bool("checkout", false, "If specified, the branch will be checked out on each project found")
 }
 
 func (cmd *FindBranchCommand) CheckFlagsAndDefaults() error {
@@ -71,6 +73,15 @@ func (cmd *FindBranchCommand) Execute(ctx context.Context) error {
 			}
 			comps := strings.Split(path, string(os.PathSeparator))
 			name := comps[len(comps)-1]
+
+			if *cmd.checkout {
+				err := git.Checkout(context.Background(), path, res.Name)
+				if err != nil {
+					fmt.Printf("Failed to checkout branch '%s' in '%s': %s\n", res.Name, path, err.Error())
+					return nil
+				}
+			}
+
 			return &branchRes{project: name, branch: *res}
 		},
 		*repositories,
