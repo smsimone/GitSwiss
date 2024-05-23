@@ -7,14 +7,27 @@ import (
 	"it.smaso/git_swiss/pool"
 )
 
+type GitStrategy string
+
 const (
-	MERGE_STRATEGY string = "merge"
-	PULL_STRATEGY  string = "pull"
+	MERGE_STRATEGY GitStrategy = "merge"
+	PULL_STRATEGY  GitStrategy = "pull"
 )
 
+func StrategyFromString(strategy string) (GitStrategy, error) {
+	switch strategy {
+	case "merge":
+		return MERGE_STRATEGY, nil
+	case "pull":
+		return PULL_STRATEGY, nil
+	default:
+		return MERGE_STRATEGY, fmt.Errorf("strategy %s is not valid", strategy)
+	}
+}
+
 // Align aligns the target branch with the source branch
-func Align(ctx context.Context, path, source, target string, strategy string, remote string) error {
-	results := pool.RunInParallel[string, *BranchResult](
+func Align(ctx context.Context, path, source, target string, strategy GitStrategy, remote string) error {
+	results := pool.RunInParallel(
 		func() pool.KeyedResult[string, *BranchResult] {
 			return pool.KeyedResult[string, *BranchResult]{
 				Key:   "source",
